@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import glob
 
 def main():
     classes = st.sidebar.text_input('Class', '10CL1')
@@ -14,14 +15,28 @@ def main():
         elif name == None or len(name) == 0:
             st.write('Please input Student Name')
         else:
-            df = pd.read_csv('data/08022022.csv')
-            rs = df.loc[df['Tên (Tên gốc)'].str.startswith(classes + '-' + id)]
-            rs.drop(columns='Email người dùng', inplace=True)
-            st.write(rs)
-            st.write('Summary')
-            total_time = rs['Thời gian (Phút)'].sum()
-            time = rs.iloc[0]['Thời gian vào'][:10]
-            st.write(time, total_time, 'minutes')
+            st.write('Result')
+            files = glob.glob('data/*.csv')
+            summary = {}
+            i = 0
+            for f in files:
+                df = pd.read_csv(f)
+                rs = df.loc[df['Tên (Tên gốc)'].str.startswith(classes + '-' + id)]
+                if not rs.empty:
+                    rs.drop(columns='Email người dùng', inplace=True)
+                    st.write(rs)
+                    total_time = rs['Thời gian (Phút)'].sum()
+                    time = rs.iloc[0]['Thời gian vào'][:10]
+                    summary[i] = [time, total_time]
+                    i += 1
+
+            if summary:
+                st.write('Summary')
+                df_summary = pd.DataFrame.from_dict(summary, orient='index', columns=['Date', 'Time'])
+                st.write(df_summary)
+
+    if st.button('Export'):
+        st.write('... Exporting, please wait')
 
 if __name__ == "__main__":
     main()
