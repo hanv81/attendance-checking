@@ -30,6 +30,15 @@ def search(classes, id, name):
             df_summary = pd.DataFrame.from_dict(summary, orient='index', columns=['Date', 'Time'])
             st.write(df_summary)
 
+def export():
+    st.write(' Exporting, please wait ...')
+    files = glob.glob('data/*.csv')
+    for f in files:
+        df = pd.read_csv(f)
+        df = df.groupby(['Tên (Tên gốc)'])['Thời gian (Phút)'].sum()
+        st.write(df)
+        print(df.head())
+
 def main():
     classes = st.sidebar.text_input('Class', '10CL1')
     id = st.sidebar.text_input('Student ID', '33')
@@ -39,7 +48,7 @@ def main():
         search(classes, id, name)
 
     if st.sidebar.button('Export'):
-        st.write(' Exporting, please wait ...')
+        export()
 
 if __name__ == "__main__":
     main()
