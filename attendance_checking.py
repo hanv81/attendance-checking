@@ -13,7 +13,7 @@ if st.sidebar.button('Search'):
     elif name == None or len(name) == 0:
         st.write('Please input Student Name')
     else:
-        df = pd.read_csv('data.csv')
+        df = pd.read_csv('data/08022022.csv')
         rs = df.loc[df['Tên (Tên gốc)'].str.startswith(classes + '-' + id)]
         rs.drop(columns='Email người dùng', inplace=True)
         st.write(rs)
