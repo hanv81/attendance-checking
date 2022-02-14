@@ -31,13 +31,15 @@ def search(classes, id, name):
             st.write(df_summary)
 
 def export():
-    st.write(' Exporting, please wait ...')
     files = glob.glob('data/*.csv')
+    ls_df = []
     for f in files:
         df = pd.read_csv(f)
         df = df.groupby(['Tên (Tên gốc)'])['Thời gian (Phút)'].sum()
         st.write(df)
-        print(df.head())
+        ls_df.append(df)
+    df = pd.concat(ls_df)
+    df.to_csv('export.csv')
 
 def main():
     classes = st.sidebar.text_input('Class', '10CL1')
