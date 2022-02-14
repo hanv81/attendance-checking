@@ -35,8 +35,9 @@ def export():
     ls_df = []
     for f in files:
         df = pd.read_csv(f)
+        time = df.iloc[0]['Thời gian vào'][:10]
         df = df.groupby(['Tên (Tên gốc)'])['Thời gian (Phút)'].sum()
-        st.write(df)
+        st.write(time, df)
         ls_df.append(df)
     df = pd.concat(ls_df)
     df.to_csv('export.csv')
