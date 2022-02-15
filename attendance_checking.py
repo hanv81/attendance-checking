@@ -7,7 +7,7 @@ def search(classes, id, name):
         st.write('Please input Class')
     elif id == None or len(id) == 0:
         st.write('Please input Student ID')
-    elif name == None or len(name) == 0:
+    elif name == None or len(name) < 2:
         st.write('Please input Student Name')
     else:
         st.write('Result')
@@ -16,7 +16,8 @@ def search(classes, id, name):
         i = 0
         for f in files:
             df = pd.read_csv(f)
-            rs = df.loc[df['Tên (Tên gốc)'].str.startswith(classes + '-' + id)]
+            pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
+            rs = df.loc[df['Tên (Tên gốc)'].str.match(pat, case=False)]
             if not rs.empty:
                 rs.drop(columns='Email người dùng', inplace=True)
                 st.write(rs)
@@ -47,7 +48,7 @@ def main():
     name = st.sidebar.text_input('Student Name', 'Trâm')
 
     if st.sidebar.button('Search'):
-        search(classes, id, name)
+        search(classes.strip(), id.strip(), name.strip())
 
     if st.sidebar.button('Export'):
         export()
