@@ -45,9 +45,9 @@ def export():
     writer.save()
 
 def main():
-    classes = st.sidebar.text_input('Class', '10CL1')
-    id = st.sidebar.text_input('Student ID', '33')
-    name = st.sidebar.text_input('Student Name', 'Trâm')
+    classes = st.sidebar.text_input('Class', '')
+    id = st.sidebar.text_input('Student ID', '')
+    name = st.sidebar.text_input('Student Name', '')
 
     if st.sidebar.button('Search'):
         search(classes.strip(), id.strip(), name.strip())
