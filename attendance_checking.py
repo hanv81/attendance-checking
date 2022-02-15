@@ -32,15 +32,14 @@ def search(classes, id, name):
 
 def export():
     files = glob.glob('data/*.csv')
-    ls_df = []
+    writer = pd.ExcelWriter('export.xlsx')
     for f in files:
         df = pd.read_csv(f)
         time = df.iloc[0]['Thời gian vào'][:10]
-        df = df.groupby(['Tên (Tên gốc)'])['Thời gian (Phút)'].sum()
-        st.write(time, df)
-        ls_df.append(df)
-    df = pd.concat(ls_df)
-    df.to_csv('export.csv')
+        sr = df.groupby(['Tên (Tên gốc)'])['Thời gian (Phút)'].sum()
+        st.write(time, sr)
+        sr.to_excel(writer, sheet_name=time.replace("/","-"))
+    writer.save()
 
 def main():
     classes = st.sidebar.text_input('Class', '10CL1')
