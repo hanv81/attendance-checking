@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import glob
+import os
 
 def search(classes, id, name):
     if classes == None or len(classes) == 0:
@@ -54,6 +55,11 @@ def main():
 
     if st.sidebar.button('Export'):
         export()
+
+    uploaded_files = st.sidebar.file_uploader("Choose CSV files", accept_multiple_files=True, type='csv')
+    for file in uploaded_files:
+        with open(os.path.join("data", file.name), "wb") as f:
+            f.write(file.getbuffer())
 
 if __name__ == "__main__":
     main()
