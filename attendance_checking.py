@@ -32,6 +32,8 @@ def search(classes, id, name):
             st.write(df_summary)
 
 def export():
+    with open("export.xlsx", "rb") as file:
+        st.download_button(label="Download", data=file, file_name="export.xlsx", mime="data/xlsx")
     files = glob.glob('data/*.csv')
     writer = pd.ExcelWriter('export.xlsx')
     for f in files:
