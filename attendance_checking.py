@@ -25,16 +25,19 @@ def search(classes, id, name):
         summary = {}
         i = 0
         for f in files:
-            df = pd.read_csv(f)
-            pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
-            rs = df.loc[df['Tên (Tên gốc)'].str.match(pat, case=False)]
-            if not rs.empty:
-                rs.drop(columns='Email người dùng', inplace=True)
-                st.write(rs)
-                total_time = rs['Thời gian (Phút)'].sum()
-                time = rs.iloc[0]['Thời gian vào'][:10]
-                summary[i] = [time, total_time]
-                i += 1
+            try:
+                df = pd.read_csv(f)
+                pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
+                rs = df.loc[df['Tên (Tên gốc)'].str.match(pat, case=False)]
+                if not rs.empty:
+                    rs.drop(columns='Email người dùng', inplace=True)
+                    st.write(rs)
+                    total_time = rs['Thời gian (Phút)'].sum()
+                    time = rs.iloc[0]['Thời gian vào'][:10]
+                    summary[i] = [time, total_time]
+                    i += 1
+            except:
+                print('Error')
 
         if summary:
             st.write('Summary')
