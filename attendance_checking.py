@@ -3,14 +3,11 @@ import pandas as pd
 import glob
 import os
 
-def verify(classes, id, name):
+def verify(classes, name):
     if classes == None or len(classes) == 0:
         st.write('Please input Class')
         return False
-    elif id == None or len(id) == 0:
-        st.write('Please input Student ID')
-        return False
-    elif name == None or len(name) < 2:
+    elif name == None or len(name) == 0:
         st.write('Please input Student Name')
         return False
     return True
