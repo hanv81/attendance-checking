@@ -13,7 +13,7 @@ def verify(classes, name):
     return True
 
 def search(classes, id, name):
-    if verify(classes, id, name):
+    if verify(classes, name):
         files = glob.glob('data/*.csv')
         if not files:
             st.write('Data files not found')
@@ -25,7 +25,10 @@ def search(classes, id, name):
         for f in files:
             try:
                 df = pd.read_csv(f)
-                pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
+                if len(id) > 0:
+                    pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
+                else:
+                    pat = "^" + classes + ".*" + name
                 rs = df.loc[df['Tên (Tên gốc)'].str.match(pat, case=False)]
                 if not rs.empty:
                     rs.drop(columns='Email người dùng', inplace=True)
