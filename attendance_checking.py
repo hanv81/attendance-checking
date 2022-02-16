@@ -45,17 +45,25 @@ def search(classes, id, name):
             st.write(df_summary)
 
 def export():
-    with open("export.xlsx", "rb") as file:
-        st.download_button(label="Download", data=file, file_name="export.xlsx", mime="data/xlsx")
     files = glob.glob('data/*.csv')
+    if not files:
+        st.write('Data files not found')
+        return
+
     writer = pd.ExcelWriter('export.xlsx')
+    report = []
     for f in files:
         df = pd.read_csv(f)
         time = df.iloc[0]['Thời gian vào'][:10]
         sr = df.groupby(['Tên (Tên gốc)'])['Thời gian (Phút)'].sum()
-        st.write(time, sr)
         sr.to_excel(writer, sheet_name=time.replace("/","-"))
+        report += [(time, sr)]
     writer.save()
+
+    with open("export.xlsx", "rb") as file:
+        st.download_button(label="Download", data=file, file_name="export.xlsx", mime="data/xlsx")
+    for time, sr in report:
+        st.write(time, sr)
 
 def main():
     classes = st.sidebar.text_input('Class', '')
