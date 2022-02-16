@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import glob
+import os
 
 def verify(classes, id, name):
     if classes == None or len(classes) == 0:
@@ -49,6 +50,8 @@ def export():
     if not files:
         st.write('Data files not found')
         return
+    if os.path.exists("export.xlsx"):
+        os.remove("export.xlsx")
 
     writer = pd.ExcelWriter('export.xlsx')
     report = []
