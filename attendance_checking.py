@@ -2,16 +2,26 @@ import streamlit as st
 import pandas as pd
 import glob
 
-def search(classes, id, name):
+def verify(classes, id, name):
     if classes == None or len(classes) == 0:
         st.write('Please input Class')
+        return False
     elif id == None or len(id) == 0:
         st.write('Please input Student ID')
+        return False
     elif name == None or len(name) < 2:
         st.write('Please input Student Name')
-    else:
-        st.write('Result')
+        return False
+    return True
+
+def search(classes, id, name):
+    if verify(classes, id, name):
         files = glob.glob('data/*.csv')
+        if not files:
+            st.write('Data files not found')
+            return
+
+        st.write('Result')
         summary = {}
         i = 0
         for f in files:
