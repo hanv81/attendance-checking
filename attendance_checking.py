@@ -30,9 +30,9 @@ def search(classes, id, name):
                 for i in df.index:
                     df.loc[i,'Tên (Tên gốc)'] = unidecode.unidecode(df.loc[i,'Tên (Tên gốc)'])
                 if len(id) > 0:
-                    pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + unidecode.unidecode(name)
+                    pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
                 else:
-                    pat = "^" + classes + ".*" + unidecode.unidecode(name)
+                    pat = "^" + classes + ".*" + name
                 rs = df.loc[df['Tên (Tên gốc)'].str.match(pat, case=False)]
 
                 if not rs.empty:
@@ -79,7 +79,7 @@ def main():
     name = st.sidebar.text_input('Student Name', '')
 
     if st.sidebar.button('Search'):
-        search(classes.strip(), id.strip(), name.strip())
+        search(unidecode.unidecode(classes.strip()), id.strip(), unidecode.unidecode(name.strip()))
 
     if st.sidebar.button('Export'):
         export()
