@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import glob
 import os
+import unidecode
 
 def verify(classes, name):
     if classes == None or len(classes) == 0:
@@ -25,13 +26,17 @@ def search(classes, id, name):
         for f in files:
             try:
                 df = pd.read_csv(f)
+                df_copy = df.copy()
+                for i in df.index:
+                    df.loc[i,'Tên (Tên gốc)'] = unidecode.unidecode(df.loc[i,'Tên (Tên gốc)'])
                 if len(id) > 0:
-                    pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
+                    pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + unidecode.unidecode(name)
                 else:
-                    pat = "^" + classes + ".*" + name
+                    pat = "^" + classes + ".*" + unidecode.unidecode(name)
                 rs = df.loc[df['Tên (Tên gốc)'].str.match(pat, case=False)]
+
                 if not rs.empty:
-                    rs.drop(columns='Email người dùng', inplace=True)
+                    rs = df_copy.loc[rs.index].drop(columns=['Email người dùng', 'Khách', 'Đồng ý ghi lại'])
                     st.write(rs)
                     total_time = rs['Thời gian (Phút)'].sum()
                     time = rs.iloc[0]['Thời gian vào'][:10]
