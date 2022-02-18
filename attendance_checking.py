@@ -28,18 +28,18 @@ def search(classes, id, name):
                 df = pd.read_csv(f)
                 df_copy = df.copy()
                 for i in df.index:
-                    df.loc[i,'Tên (Tên gốc)'] = unidecode.unidecode(df.loc[i,'Tên (Tên gốc)'])
+                    df.loc[i,'Name (Original Name)'] = unidecode.unidecode(df.loc[i,'Name (Original Name)'])
                 if len(id) > 0:
                     pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
                 else:
                     pat = "^" + classes + ".*" + name
-                rs = df.loc[df['Tên (Tên gốc)'].str.match(pat, case=False)]
+                rs = df.loc[df['Name (Original Name)'].str.match(pat, case=False)]
 
                 if not rs.empty:
-                    rs = df_copy.loc[rs.index].drop(columns=['Email người dùng', 'Khách', 'Đồng ý ghi lại'])
+                    rs = df_copy.loc[rs.index].drop(columns=['User Email', 'Guest', 'Recording Consent'])
                     st.write(rs)
-                    total_time = rs['Thời gian (Phút)'].sum()
-                    time = rs.iloc[0]['Thời gian vào'][:10]
+                    total_time = rs['Duration (Minutes)'].sum()
+                    time = rs.iloc[0]['Join Time'][:10]
                     summary[i] = [time, total_time]
                     i += 1
             except:
@@ -47,7 +47,7 @@ def search(classes, id, name):
 
         if summary:
             st.write('Summary')
-            df_summary = pd.DataFrame.from_dict(summary, orient='index', columns=['Date', 'Time'])
+            df_summary = pd.DataFrame.from_dict(summary, orient='index', columns=['Date', 'Duration (Minutes)'])
             st.write(df_summary)
 
 def export():
@@ -62,8 +62,8 @@ def export():
     report = []
     for f in files:
         df = pd.read_csv(f)
-        time = df.iloc[0]['Thời gian vào'][:10]
-        sr = df.groupby(['Tên (Tên gốc)'])['Thời gian (Phút)'].sum()
+        time = df.iloc[0]['Join Time'][:10]
+        sr = df.groupby(['Name (Original Name)'])['Duration (Minutes)'].sum()
         sr.to_excel(writer, sheet_name=time.replace("/","-"))
         report += [(time, sr)]
     writer.save()
