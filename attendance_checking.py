@@ -5,6 +5,13 @@ import os
 import unidecode
 
 def verify(classes, name):
+    if classes == 'cotai1109':
+        uploaded_files = st.sidebar.file_uploader("Choose CSV files", accept_multiple_files=True, type='csv')
+        for file in uploaded_files:
+            with open(os.path.join("data", file.name), "wb") as f:
+                f.write(file.getbuffer())
+        return False
+
     if classes == None or len(classes) == 0:
         st.write('Please input Class')
         return False
