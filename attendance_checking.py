@@ -73,6 +73,47 @@ def export():
     for time, sr in report:
         st.write(time, sr)
 
+def report():
+    files = glob.glob('data/*.csv')
+    if not files:
+        st.write('Data files not found')
+        return
+    if os.path.exists("export.xlsx"):
+        os.remove("export.xlsx")
+
+    writer = pd.ExcelWriter('export.xlsx')
+    report = {}
+    for f in files:
+        df = pd.read_csv(f)
+        time = df.iloc[0]['Join Time'][:10]
+        sr = df.groupby(['Name (Original Name)'])['Duration (Minutes)'].sum()
+        for s in sr.index:
+            minutes = sr.loc[s]
+            s = s.split('-')
+            if len(s) < 3:
+                continue
+            for i in range(len(s)):
+                s[i] = s[i].strip()
+            if not s[1].isdigit():
+                continue
+            if not s[0][0:2].isdigit():
+                continue
+
+            info = report.get(s[0])
+            if info is None:
+                report[s[0]] = {s[2]:[(time, minutes)]}
+            else:
+                value = info.get(s[2])
+                if value is None:
+                    info[s[2]] = [(time, minutes)]
+                else:
+                    value.append((time, minutes))
+    print(report)
+    # writer.save()
+
+    with open("export.xlsx", "rb") as file:
+        st.download_button(label="Download", data=file, file_name="export.xlsx", mime="data/xlsx")
+
 def main():
     classes = st.sidebar.text_input('Class', '')
     id = st.sidebar.text_input('Student ID', '')
