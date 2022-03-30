@@ -101,18 +101,18 @@ def report():
 
             info = report.get(s[0])
             if info is None:
-                report[s[0]] = {s[2]:[(time, minutes)]}
+                report[s[0]] = [[s[2], time, str(minutes)]]
             else:
-                value = info.get(s[2])
-                if value is None:
-                    info[s[2]] = [(time, minutes)]
-                else:
-                    value.append((time, minutes))
-    print(report)
-    # writer.save()
+                info.append([s[2], time, str(minutes)])
+
+    for cl,lst in report.items():
+        df = pd.DataFrame(lst, columns=['Name', 'Date', 'Duration (Minutes)'])
+        df.to_excel(writer, sheet_name=cl)
+
+    writer.save()
 
     with open("export.xlsx", "rb") as file:
-        st.download_button(label="Download", data=file, file_name="export.xlsx", mime="data/xlsx")
+        st.download_button(label="Download", data=file, file_name="report.xlsx", mime="data/xlsx")
 
 def main():
     classes = st.sidebar.text_input('Class', '')
