@@ -99,6 +99,9 @@ def report():
             if not s[0][0:2].isdigit():
                 continue
 
+            if s[2].find('(') > 0:
+                s[2] = s[2][:s[2].find('(')-1]
+
             info = report.get(s[0])
             if info is None:
                 report[s[0]] = [[s[2], time, str(minutes)]]
