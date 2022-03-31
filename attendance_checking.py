@@ -102,14 +102,15 @@ def report():
             if s[2].find('(') > 0:
                 s[2] = s[2][:s[2].find('(')-1]
 
+            check = 'x' if minutes < 60 else ''
             info = report.get(s[0])
             if info is None:
-                report[s[0]] = [[s[2], time, str(minutes)]]
+                report[s[0]] = [[s[2], time, str(minutes), check]]
             else:
-                info.append([s[2], time, str(minutes)])
+                info.append([s[2], time, str(minutes), check])
 
     for cl,lst in report.items():
-        df = pd.DataFrame(lst, columns=['Name', 'Date', 'Duration (Minutes)'])
+        df = pd.DataFrame(lst, columns=['Name', 'Date', 'Duration (Minutes)', 'Check'])
         df.to_excel(writer, sheet_name=cl)
 
     writer.save()
