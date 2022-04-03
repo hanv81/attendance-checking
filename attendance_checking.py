@@ -73,15 +73,15 @@ def export():
     for time, sr in report:
         st.write(time, sr)
 
-def report():
+def summary():
     files = glob.glob('data/*.csv')
     if not files:
         st.write('Data files not found')
         return
-    if os.path.exists("export.xlsx"):
-        os.remove("export.xlsx")
+    if os.path.exists("summary.xlsx"):
+        os.remove("summary.xlsx")
 
-    writer = pd.ExcelWriter('export.xlsx')
+    writer = pd.ExcelWriter('summary.xlsx')
     report = {}
     for f in files:
         df = pd.read_csv(f)
@@ -115,8 +115,8 @@ def report():
 
     writer.save()
 
-    with open("export.xlsx", "rb") as file:
-        st.download_button(label="Download", data=file, file_name="report.xlsx", mime="data/xlsx")
+    with open("summary.xlsx", "rb") as file:
+        st.download_button(label="Download", data=file, file_name="summary.xlsx", mime="data/xlsx")
 
 def main():
     classes = st.sidebar.text_input('Class', '')
