@@ -82,9 +82,15 @@ def summary():
         os.remove("summary.xlsx")
 
     writer = pd.ExcelWriter('summary.xlsx')
-    report = {}
+    summary = {}
     for f in files:
         df = pd.read_csv(f)
+        for i in df.index:
+            name = df['Name (Original Name)'][i].replace(' -', '-').replace('- ','-')
+            if name.find('(') > 0:
+                name = name[:name.find('(')-1]
+            df['Name (Original Name)'][i] = name
+
         time = df.iloc[0]['Join Time'][:10]
         sr = df.groupby(['Name (Original Name)'])['Duration (Minutes)'].sum()
         for s in sr.index:
@@ -99,17 +105,14 @@ def summary():
             if not s[0][0:2].isdigit():
                 continue
 
-            if s[2].find('(') > 0:
-                s[2] = s[2][:s[2].find('(')-1]
-
             check = 'x' if minutes < 60 else ''
-            info = report.get(s[0])
+            info = summary.get(s[0])
             if info is None:
-                report[s[0]] = [[s[2], time, str(minutes), check]]
+                summary[s[0]] = [[s[2], time, str(minutes), check]]
             else:
                 info.append([s[2], time, str(minutes), check])
 
-    for cl,lst in report.items():
+    for cl,lst in summary.items():
         df = pd.DataFrame(lst, columns=['Name', 'Date', 'Duration (Minutes)', 'Check'])
         df.to_excel(writer, sheet_name=cl)
 
