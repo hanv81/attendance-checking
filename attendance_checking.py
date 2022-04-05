@@ -85,11 +85,7 @@ def summary():
     summary = {}
     for f in files:
         df = pd.read_csv(f)
-        for i in df.index:
-            name = df['Name (Original Name)'][i].replace(' -', '-').replace('- ','-')
-            if name.find('(') > 0:
-                name = name[:name.find('(')-1]
-            df['Name (Original Name)'][i] = name
+        preprocess(df)
 
         time = df.iloc[0]['Join Time'][:10]
         sr = df.groupby(['Name (Original Name)'])['Duration (Minutes)'].sum()
@@ -120,6 +116,13 @@ def summary():
 
     with open("summary.xlsx", "rb") as file:
         st.download_button(label="Download", data=file, file_name="summary.xlsx", mime="data/xlsx")
+
+def preprocess(df):
+    for i in df.index:
+        name = df['Name (Original Name)'][i].replace(' -', '-').replace('- ','-').replace('CP-SN', 'CPSN').replace('CTr', 'CTR').replace('CTR-N', 'CTRN').replace('CSu', 'CSU').replace('CSU-Đ', 'CSUĐ').replace('CSi', 'CSI').replace('CTin', 'CTIN').replace('Cl1', 'CL1').replace('CL-', 'CL2-').replace('10d2', '10D2').replace('10CT-', '10CT2-').replace('19SN', '10SN').replace('10CA-', '10CA1-')
+        if name.find('(') > 0:
+            name = name[:name.find('(')-1]
+        df['Name (Original Name)'][i] = name
 
 def main():
     classes = st.sidebar.text_input('Class', '')
