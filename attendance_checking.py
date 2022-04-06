@@ -128,15 +128,15 @@ def preprocess(df):
     t = int(round(time.time() * 1000)) - t
     print('preprocess time:', t)
 
-def drop_invalid_rows(df):
-    new_df = pd.DataFrame([], columns=['class', 'name', 'date', 'join time'])
+def create_new_dataframe(df):
+    new_df = pd.DataFrame([], columns=['class', 'name', 'join time', 'duration'])
     for i in df.index:
         name = df['Name (Original Name)'][i]
         s = name.split('-')
         if len(s) != 3:
             continue
-        for i in range(len(s)):
-            s[i] = s[i].strip()
+        for j in range(len(s)):
+            s[j] = s[j].strip()
         if not s[1].isdigit():
             continue
         if not s[0][0:2].isdigit():
@@ -144,27 +144,42 @@ def drop_invalid_rows(df):
 
         date = df['Join Time'][i][:10]
         time = df['Join Time'][i][10]
-        row = {'class':s[0], 'name':s[2], 'date':date, 'join time': time}
+        minutes = df['Duration (Minutes)'][i]
+        row = {'class':s[0], 'name':s[2], 'join time': time, 'duration': minutes}
         new_df = new_df.append(row, ignore_index=True)
+    return new_df, date
 
 def summary2():
     files = glob.glob('data/*.csv')
     if not files:
         st.write('Data files not found')
         return
-    # if os.path.exists("summary.xlsx"):
-    #     os.remove("summary.xlsx")
+    if os.path.exists("summary.xlsx"):
+        os.remove("summary.xlsx")
 
-    # writer = pd.ExcelWriter('summary.xlsx')
-    # summary = {}
+    writer = pd.ExcelWriter('summary.xlsx')
+    summary = {}
     for f in files:
         df = pd.read_csv(f)
         preprocess(df)
-        drop_invalid_rows(df)
-        
-    # writer.save()
-    # with open("summary.xlsx", "rb") as file:
-    #     st.download_button(label="Download", data=file, file_name="summary.xlsx", mime="data/xlsx")
+        df, date = create_new_dataframe(df)
+
+        sr = df.groupby(['class', 'name'])['duration'].sum()
+        for (cls, name), minutes in sr.items():
+            check = 'x' if minutes < 60 else ''
+            info = summary.get(cls)
+            if info is None:
+                summary[cls] = [[name, date, str(minutes), check]]
+            else:
+                info.append([name, date, str(minutes), check])
+
+    for cls,lst in summary.items():
+        df = pd.DataFrame(lst, columns=['Name', 'Date', 'Duration', 'Check'])
+        df.to_excel(writer, sheet_name=cls)
+
+    writer.save()
+    with open("summary.xlsx", "rb") as file:
+        st.download_button(label="Download", data=file, file_name="summary.xlsx", mime="data/xlsx")
 
 def main():
     classes = st.sidebar.text_input('Class', '')
