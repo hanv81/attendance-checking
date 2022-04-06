@@ -129,7 +129,7 @@ def preprocess(df):
     print('preprocess time:', t)
 
 def create_new_dataframe(df):
-    new_df = pd.DataFrame([], columns=['class', 'name', 'join time', 'duration'])
+    data = []
     for i in df.index:
         name = df['Name (Original Name)'][i]
         s = name.split('-')
@@ -144,9 +144,10 @@ def create_new_dataframe(df):
 
         date = df['Join Time'][i][:10]
         time = df['Join Time'][i][10]
-        minutes = df['Duration (Minutes)'][i]
-        row = {'class':s[0], 'name':s[2], 'join time': time, 'duration': minutes}
-        new_df = new_df.append(row, ignore_index=True)
+        duration = df['Duration (Minutes)'][i]
+        data.append([s[0], s[2], time, duration])
+
+    new_df = pd.DataFrame(data, columns=['class', 'name', 'join time', 'duration'])
     return new_df, date
 
 def summary2():
@@ -160,6 +161,7 @@ def summary2():
     writer = pd.ExcelWriter('summary.xlsx')
     summary = {}
     for f in files:
+        t = int(round(time.time() * 1000))
         df = pd.read_csv(f)
         preprocess(df)
         df, date = create_new_dataframe(df)
@@ -172,6 +174,8 @@ def summary2():
                 summary[cls] = [[name, date, str(minutes), check]]
             else:
                 info.append([name, date, str(minutes), check])
+        t = int(round(time.time() * 1000)) - t
+        print('file process time:', t)
 
     for cls,lst in summary.items():
         df = pd.DataFrame(lst, columns=['Name', 'Date', 'Duration', 'Check'])
