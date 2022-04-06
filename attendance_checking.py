@@ -3,6 +3,7 @@ import pandas as pd
 import glob
 import os
 import unidecode
+import time
 
 def verify(classes, name):
     if classes == None or len(classes) == 0:
@@ -118,11 +119,14 @@ def summary():
         st.download_button(label="Download", data=file, file_name="summary.xlsx", mime="data/xlsx")
 
 def preprocess(df):
+    t = int(round(time.time() * 1000))
     for i in df.index:
-        name = df['Name (Original Name)'][i].replace('_', '-').replace(' -', '-').replace('- ','-').replace('CP-SN', 'CPSN').replace('CTr', 'CTR').replace('CTR-N', 'CTRN').replace('CSu', 'CSU').replace('CSU-Đ', 'CSUĐ').replace('CSi', 'CSI').replace('CTin', 'CTIN').replace('Cl1', 'CL1').replace('CL-', 'CL2-').replace('10d2', '10D2').replace('10CT-', '10CT2-').replace('19SN', '10SN').replace('10CA-', '10CA1-')
+        name = df['Name (Original Name)'][i].replace('_', '-').replace('CP-SN', 'CPSN').replace('CTr', 'CTR').replace('CTR-N', 'CTRN').replace('CSu', 'CSU').replace('CSU-Đ', 'CSUĐ').replace('CSi', 'CSI').replace('CTin', 'CTIN').replace('Cl1', 'CL1').replace('CL-', 'CL2-').replace('10d2', '10D2').replace('10CT-', '10CT2-').replace('19SN', '10SN').replace('10CA-', '10CA1-').replace('10VA3', '10CA3')
         if name.find('(') > 0:
             name = name[:name.find('(')-1]
         df['Name (Original Name)'][i] = name
+    t = int(round(time.time() * 1000)) - t
+    print('preprocess time:', t)
 
 def drop_invalid_rows(df):
     new_df = pd.DataFrame([], columns=['class', 'name', 'date', 'join time'])
@@ -137,12 +141,11 @@ def drop_invalid_rows(df):
             continue
         if not s[0][0:2].isdigit():
             continue
+
         date = df['Join Time'][i][:10]
         time = df['Join Time'][i][10]
         row = {'class':s[0], 'name':s[2], 'date':date, 'join time': time}
         new_df = new_df.append(row, ignore_index=True)
-
-    print(new_df)
 
 def summary2():
     files = glob.glob('data/*.csv')
