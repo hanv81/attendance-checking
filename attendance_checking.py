@@ -4,6 +4,7 @@ import glob
 import os
 import unidecode
 import time
+from datetime import datetime
 
 def verify(classes, name):
     if classes == None or len(classes) == 0:
@@ -130,6 +131,8 @@ def summary():
             summary[cls].append([name, 12-count, 0, 0, ''])
 
     sr = df.groupby(['class', 'name', 'date']).agg({'duration':'sum', 'time': 'min'})
+    fmt = '%H:%M:%S'
+    t0 = datetime.strptime('13:05:59', fmt)
     for i in sr.index:
         cls, name, date = i
         duration = sr.loc[i]['duration']
@@ -137,11 +140,14 @@ def summary():
         cls = summary[cls]
         for std in cls:
             if std[0] == name:
-                std[4] += '(' + date + ' : ' + str(duration) + ') '
-                if t > '13:05:00':
+                t = datetime.strptime(t, fmt)
+                dt = (t-t0).seconds // 60
+                if t > t0 and dt > 0:
                     std[2] += 1
+                    std[4] += '| ' + date + ' : ' + str(dt) + '\' late '
                 if duration < 60:
                     std[3] += 1
+                    std[4] += '| ' + date + ' : ' + str(duration) + '\' duration '
                 break
 
     for cls,lst in summary.items():
