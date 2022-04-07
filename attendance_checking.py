@@ -142,12 +142,12 @@ def create_new_dataframe(df):
         if not s[0][0:2].isdigit():
             continue
 
-        date = df['Join Time'][i][:10]
         time = df['Join Time'][i][10]
         duration = df['Duration (Minutes)'][i]
         data.append([s[0], s[2], time, duration])
 
     new_df = pd.DataFrame(data, columns=['class', 'name', 'join time', 'duration'])
+    date = df['Join Time'][0][:10]
     return new_df, date
 
 def summary2():
