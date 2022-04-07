@@ -74,50 +74,6 @@ def export():
     for time, sr in report:
         st.write(time, sr)
 
-def summary():
-    files = glob.glob('data/*.csv')
-    if not files:
-        st.write('Data files not found')
-        return
-    if os.path.exists("summary.xlsx"):
-        os.remove("summary.xlsx")
-
-    writer = pd.ExcelWriter('summary.xlsx')
-    summary = {}
-    for f in files:
-        df = pd.read_csv(f)
-        preprocess(df)
-
-        time = df.iloc[0]['Join Time'][:10]
-        sr = df.groupby(['Name (Original Name)'])['Duration (Minutes)'].sum()
-        for s in sr.index:
-            minutes = sr.loc[s]
-            s = s.split('-')
-            if len(s) < 3:
-                continue
-            for i in range(len(s)):
-                s[i] = s[i].strip()
-            if not s[1].isdigit():
-                continue
-            if not s[0][0:2].isdigit():
-                continue
-
-            check = 'x' if minutes < 60 else ''
-            info = summary.get(s[0])
-            if info is None:
-                summary[s[0]] = [[s[2], time, str(minutes), check]]
-            else:
-                info.append([s[2], time, str(minutes), check])
-
-    for cl,lst in summary.items():
-        df = pd.DataFrame(lst, columns=['Name', 'Date', 'Duration (Minutes)', 'Check'])
-        df.to_excel(writer, sheet_name=cl)
-
-    writer.save()
-
-    with open("summary.xlsx", "rb") as file:
-        st.download_button(label="Download", data=file, file_name="summary.xlsx", mime="data/xlsx")
-
 def preprocess(df):
     t = int(round(time.time() * 1000))
     for i in df.index:
@@ -128,8 +84,8 @@ def preprocess(df):
     t = int(round(time.time() * 1000)) - t
     print('preprocess time:', t)
 
-def create_new_dataframe(df):
-    data = []
+def create_data(df, data):
+    date = df['Join Time'][0][:10]
     for i in df.index:
         name = df['Name (Original Name)'][i]
         s = name.split('-')
@@ -142,15 +98,11 @@ def create_new_dataframe(df):
         if not s[0][0:2].isdigit():
             continue
 
-        time = df['Join Time'][i][10]
+        t = df['Join Time'][i][11:]
         duration = df['Duration (Minutes)'][i]
-        data.append([s[0], s[2], time, duration])
+        data.append([s[0], s[2], date, t, duration])
 
-    new_df = pd.DataFrame(data, columns=['class', 'name', 'join time', 'duration'])
-    date = df['Join Time'][0][:10]
-    return new_df, date
-
-def summary2():
+def summary():
     files = glob.glob('data/*.csv')
     if not files:
         st.write('Data files not found')
@@ -159,27 +111,41 @@ def summary2():
         os.remove("summary.xlsx")
 
     writer = pd.ExcelWriter('summary.xlsx')
-    summary = {}
+    data = []
     for f in files:
         t = int(round(time.time() * 1000))
         df = pd.read_csv(f)
         preprocess(df)
-        df, date = create_new_dataframe(df)
-
-        sr = df.groupby(['class', 'name'])['duration'].sum()
-        for (cls, name), minutes in sr.items():
-            check = 'x' if minutes < 60 else ''
-            info = summary.get(cls)
-            if info is None:
-                summary[cls] = [[name, date, str(minutes), check]]
-            else:
-                info.append([name, date, str(minutes), check])
+        create_data(df, data)
         t = int(round(time.time() * 1000)) - t
-        print('file process time:', t)
+        print(f, 'process time:', t)
+
+    df = pd.DataFrame(data, columns=['class', 'name', 'date', 'time', 'duration'])
+    sr = df.groupby(['class', 'name'])['date'].nunique()
+    summary = {}
+    for (cls, name), count in sr.items():
+        if summary.get(cls) is None:
+            summary[cls] = [[name, 12-count, 0, 0, '']]
+        else:
+            summary[cls].append([name, 12-count, 0, 0, ''])
+
+    sr = df.groupby(['class', 'name', 'date']).agg({'duration':'sum', 'time': 'min'})
+    for i in sr.index:
+        cls, name, date = i
+        duration = sr.loc[i]['duration']
+        t = sr.loc[i]['time']
+        cls = summary[cls]
+        for std in cls:
+            if std[0] == name:
+                std[4] += '(' + date + ' : ' + str(duration) + ') '
+                if t > '13:05:00':
+                    std[2] += 1
+                if duration < 60:
+                    std[3] += 1
+                break
 
     for cls,lst in summary.items():
-        df = pd.DataFrame(lst, columns=['Name', 'Date', 'Duration', 'Check'])
-        df.to_excel(writer, sheet_name=cls)
+        pd.DataFrame(lst, columns=['Name', 'Absent', 'Late', 'Short Duration', 'Detail']).to_excel(writer, sheet_name=cls)
 
     writer.save()
     with open("summary.xlsx", "rb") as file:
@@ -195,6 +161,9 @@ def main():
 
     if st.sidebar.button('Export'):
         export()
+
+    if st.sidebar.button('Summary'):
+        summary()
 
     uploaded_files = st.sidebar.file_uploader("Choose CSV files", accept_multiple_files=True, type='csv')
     if len(uploaded_files) > 0:
