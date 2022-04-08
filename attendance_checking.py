@@ -43,14 +43,14 @@ def search(classes, id, name):
                     duration = rs['Duration (Minutes)'].sum()
                     join_time = rs['Join Time'].min()[11:]
                     date = rs.iloc[0]['Join Time'][:10]
-                    summary[i] = [date, duration, join_time]
+                    summary[i] = [date, join_time, duration]
                     i += 1
             except:
                 print('Error')
 
         if summary:
             st.write('Summary')
-            df_summary = pd.DataFrame.from_dict(summary, orient='index', columns=['Date', 'Duration (Minutes)', 'Join Time'])
+            df_summary = pd.DataFrame.from_dict(summary, orient='index', columns=['Date', 'Join Time', 'Duration (Minutes)'])
             st.write(df_summary)
 
 def export():
