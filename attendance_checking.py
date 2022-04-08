@@ -78,7 +78,8 @@ def export():
 
 def preprocess(df):
     for i in df.index:
-        name = df['Name (Original Name)'][i].replace('_', '-').replace('CP-SN', 'CPSN').replace('CTr', 'CTR').replace('CTR-N', 'CTRN').replace('CSu', 'CSU').replace('CSU-Đ', 'CSUĐ').replace('CSi', 'CSI').replace('CTin', 'CTIN').replace('Cl1', 'CL1').replace('CL-', 'CL2-').replace('10d2', '10D2').replace('10CT-', '10CT2-').replace('19SN', '10SN').replace('10CA-', '10CA1-').replace('10VA3', '10CA3')
+        name = df['Name (Original Name)'][i]
+        # name = name.replace('_', '-').replace('CP-SN', 'CPSN').replace('CTr', 'CTR').replace('CTR-N', 'CTRN').replace('CSu', 'CSU').replace('CSU-Đ', 'CSUĐ').replace('CSi', 'CSI').replace('CTin', 'CTIN').replace('Cl1', 'CL1').replace('CL-', 'CL2-').replace('10d2', '10D2').replace('10CT-', '10CT2-').replace('19SN', '10SN').replace('10CA-', '10CA1-').replace('10VA3', '10CA3')
         if name.find('(') > 0:
             name = name[:name.find('(')-1]
         df.loc[i,'Name (Original Name)'] = name
