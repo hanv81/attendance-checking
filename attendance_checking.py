@@ -29,8 +29,8 @@ def search(classes, id, name):
             try:
                 df = pd.read_csv(f)
                 df_copy = df.copy()
-                for i in df.index:
-                    df.loc[i,'Name (Original Name)'] = unidecode.unidecode(df.loc[i,'Name (Original Name)'])
+                for j in df.index:
+                    df.loc[j,'Name (Original Name)'] = unidecode.unidecode(df.loc[j,'Name (Original Name)'])
                 if len(id) > 0:
                     pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
                 else:
@@ -40,16 +40,18 @@ def search(classes, id, name):
                 if not rs.empty:
                     rs = df_copy.loc[rs.index].drop(columns=['User Email', 'Guest', 'Recording Consent'])
                     st.write(rs)
-                    total_time = rs['Duration (Minutes)'].sum()
-                    time = rs.iloc[0]['Join Time'][:10]
-                    summary[i] = [time, total_time]
+                    duration = rs['Duration (Minutes)'].sum()
+                    join_time = rs['Join Time'].min()[11:]
+                    date = rs.iloc[0]['Join Time'][:10]
+                    summary[i] = [date, duration, join_time]
                     i += 1
+                    print(i)
             except:
                 print('Error')
 
         if summary:
             st.write('Summary')
-            df_summary = pd.DataFrame.from_dict(summary, orient='index', columns=['Date', 'Duration (Minutes)'])
+            df_summary = pd.DataFrame.from_dict(summary, orient='index', columns=['Date', 'Duration (Minutes)', 'Join Time'])
             st.write(df_summary)
 
 def export():
@@ -101,7 +103,7 @@ def create_data(df, data):
         data.append([s[0], s[2], date, t, duration])
 
 def summary():
-    curmilisec = int(round(time.time() * 1000))
+    curmilis = int(round(time.time() * 1000))
     files = glob.glob('data/*.csv')
     if not files:
         st.write('Data files not found')
@@ -154,8 +156,8 @@ def summary():
     with open("summary.xlsx", "rb") as file:
         st.download_button(label="Download", data=file, file_name="summary.xlsx", mime="data/xlsx")
 
-    curmilisec = int(round(time.time() * 1000)) - curmilisec
-    print('Done. Total time:', curmilisec)
+    curmilis = int(round(time.time() * 1000)) - curmilis
+    print('Done. Total time:', curmilis)
 
 def main():
     classes = st.sidebar.text_input('Class', '')
