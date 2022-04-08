@@ -23,8 +23,7 @@ def search(classes, id, name):
             return
 
         st.write('Result')
-        summary = {}
-        i = 0
+        summary = []
         for f in files:
             try:
                 df = pd.read_csv(f)
@@ -43,15 +42,13 @@ def search(classes, id, name):
                     duration = rs['Duration (Minutes)'].sum()
                     join_time = rs['Join Time'].min()[11:]
                     date = rs.iloc[0]['Join Time'][:10]
-                    summary[i] = [date, join_time, duration]
-                    i += 1
+                    summary += [[date, join_time, duration]]
             except:
                 print('Error')
 
         if summary:
             st.write('Summary')
-            df_summary = pd.DataFrame.from_dict(summary, orient='index', columns=['Date', 'Join Time', 'Duration (Minutes)'])
-            st.write(df_summary)
+            st.write(pd.DataFrame(summary, columns=['Date', 'Join Time', 'Duration (Minutes)']))
 
 def export():
     files = glob.glob('data/*.csv')
