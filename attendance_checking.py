@@ -76,14 +76,11 @@ def export():
         st.write(time, sr)
 
 def preprocess(df):
-    t = int(round(time.time() * 1000))
     for i in df.index:
         name = df['Name (Original Name)'][i].replace('_', '-').replace('CP-SN', 'CPSN').replace('CTr', 'CTR').replace('CTR-N', 'CTRN').replace('CSu', 'CSU').replace('CSU-Đ', 'CSUĐ').replace('CSi', 'CSI').replace('CTin', 'CTIN').replace('Cl1', 'CL1').replace('CL-', 'CL2-').replace('10d2', '10D2').replace('10CT-', '10CT2-').replace('19SN', '10SN').replace('10CA-', '10CA1-').replace('10VA3', '10CA3')
         if name.find('(') > 0:
             name = name[:name.find('(')-1]
         df.loc[i,'Name (Original Name)'] = name
-    t = int(round(time.time() * 1000)) - t
-    print('preprocess time:', t)
 
 def create_data(df, data):
     date = df['Join Time'][0][:10]
@@ -104,6 +101,7 @@ def create_data(df, data):
         data.append([s[0], s[2], date, t, duration])
 
 def summary():
+    curmilisec = int(round(time.time() * 1000))
     files = glob.glob('data/*.csv')
     if not files:
         st.write('Data files not found')
@@ -111,16 +109,15 @@ def summary():
     if os.path.exists("summary.xlsx"):
         os.remove("summary.xlsx")
 
+    print('creating data ...')
     writer = pd.ExcelWriter('summary.xlsx')
     data = []
     for f in files:
-        t = int(round(time.time() * 1000))
         df = pd.read_csv(f)
         preprocess(df)
         create_data(df, data)
-        t = int(round(time.time() * 1000)) - t
-        print(f, 'process time:', t)
 
+    print('processing data ...')
     df = pd.DataFrame(data, columns=['class', 'name', 'date', 'time', 'duration'])
     sr = df.groupby(['class', 'name'])['date'].nunique()
     summary = {}
@@ -156,6 +153,9 @@ def summary():
     writer.save()
     with open("summary.xlsx", "rb") as file:
         st.download_button(label="Download", data=file, file_name="summary.xlsx", mime="data/xlsx")
+
+    curmilisec = int(round(time.time() * 1000)) - curmilisec
+    print('Done. Total time:', curmilisec)
 
 def main():
     classes = st.sidebar.text_input('Class', '')
