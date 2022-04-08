@@ -45,7 +45,6 @@ def search(classes, id, name):
                     date = rs.iloc[0]['Join Time'][:10]
                     summary[i] = [date, duration, join_time]
                     i += 1
-                    print(i)
             except:
                 print('Error')
 
