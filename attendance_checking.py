@@ -117,14 +117,16 @@ def summary():
         create_data(df, data)
 
     print('processing data ...')
+    date1 = ['2022/02/08', '2022/02/15', '2022/02/22', '2022/03/01', '2022/03/08', '2022/03/15', '2022/03/22', '2022/03/29', '2022/04/05', '2022/04/12', '2022/04/19', '2022/04/26']
+    date2 = ['2022/02/11', '2022/02/18', '2022/02/25', '2022/03/04', '2022/03/11', '2022/03/18', '2022/03/25', '2022/04/01', '2022/04/08', '2022/04/15', '2022/04/22', '2022/04/29']
     df = pd.DataFrame(data, columns=['class', 'name', 'date', 'time', 'duration'])
     sr = df.groupby(['class', 'name'])['date'].nunique()
     summary = {}
     for (cls, name), count in sr.items():
         if summary.get(cls) is None:
-            summary[cls] = [[name, 12-count, 0, 0, '']]
+            summary[cls] = [[name, 12-count, 0, 0, '', []]]
         else:
-            summary[cls].append([name, 12-count, 0, 0, ''])
+            summary[cls].append([name, 12-count, 0, 0, '', []])
 
     sr = df.groupby(['class', 'name', 'date']).agg({'duration':'sum', 'time': 'min'})
     fmt = '%H:%M:%S'
@@ -144,9 +146,20 @@ def summary():
                 if duration < 60:
                     std[3] += 1
                     std[4] += '| ' + date + ' : ' + str(duration) + '\' duration '
+                if not std[5]:
+                    if date in date1:
+                        std[5].extend(date1)
+                    else:
+                        std[5].extend(date2)
+                if date in std[5]:
+                    std[5].remove(date)
                 break
 
     for cls,lst in summary.items():
+        for std in lst:
+            for date in std[5]:
+                std[4] += '| ' + date + ' : ' + ' absent'
+            std.pop()
         pd.DataFrame(lst, columns=['Name', 'Absent', 'Late', 'Short Duration', 'Detail']).to_excel(writer, sheet_name=cls)
 
     writer.save()
