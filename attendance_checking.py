@@ -122,21 +122,20 @@ def summary():
     df = pd.DataFrame(data, columns=['class', 'name', 'date', 'time', 'duration'])
     sr = df.groupby(['class', 'name'])['date'].nunique()
     summary = {}
-    for (cls, name), count in sr.items():
-        if summary.get(cls) is None:
-            summary[cls] = [[name, 12-count, 0, 0, '', []]]
+    for (cl, name), count in sr.items():
+        if summary.get(cl) is None:
+            summary[cl] = [[name, 12-count, 0, 0, '', []]]
         else:
-            summary[cls].append([name, 12-count, 0, 0, '', []])
+            summary[cl].append([name, 12-count, 0, 0, '', []])
 
     sr = df.groupby(['class', 'name', 'date']).agg({'duration':'sum', 'time': 'min'})
     fmt = '%H:%M:%S'
     t0 = datetime.strptime('13:05:59', fmt)
     for i in sr.index:
-        cls, name, date = i
+        cl, name, date = i
         duration = sr.loc[i]['duration']
         t = sr.loc[i]['time']
-        cls = summary[cls]
-        for std in cls:
+        for std in summary[cl]:
             if std[0] == name:
                 t = datetime.strptime(t, fmt)
                 dt = (t-t0).seconds // 60
@@ -155,12 +154,12 @@ def summary():
                     std[5].remove(date)
                 break
 
-    for cls,lst in summary.items():
+    for cl,lst in summary.items():
         for std in lst:
             for date in std[5]:
                 std[4] += '| ' + date + ' : ' + ' absent'
             std.pop()
-        pd.DataFrame(lst, columns=['Name', 'Absent', 'Late', 'Short Duration', 'Detail']).to_excel(writer, sheet_name=cls)
+        pd.DataFrame(lst, columns=['Name', 'Absent', 'Late', 'Short Duration', 'Detail']).to_excel(writer, sheet_name=cl)
 
     writer.save()
     with open("summary.xlsx", "rb") as file:
