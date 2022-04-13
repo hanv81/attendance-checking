@@ -180,8 +180,8 @@ def main():
     if st.sidebar.button('Export'):
         export()
 
-    if st.sidebar.button('Summary'):
-        summary()
+    # if st.sidebar.button('Summary'):
+    #     summary()
 
     uploaded_files = st.sidebar.file_uploader("Choose CSV files", accept_multiple_files=True, type='csv')
     if len(uploaded_files) > 0:
