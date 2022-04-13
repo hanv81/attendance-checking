@@ -117,8 +117,9 @@ def summary():
         create_data(df, data)
 
     print('processing data ...')
-    date1 = ['2022/02/08', '2022/02/15', '2022/02/22', '2022/03/01', '2022/03/08', '2022/03/15', '2022/03/22', '2022/03/29', '2022/04/05', '2022/04/12', '2022/04/19', '2022/04/26']
-    date2 = ['2022/02/11', '2022/02/18', '2022/02/25', '2022/03/04', '2022/03/11', '2022/03/18', '2022/03/25', '2022/04/01', '2022/04/08', '2022/04/15', '2022/04/22', '2022/04/29']
+    dates = [('2022/02/08','2022/02/11'), ('2022/02/15','2022/02/18'), ('2022/02/22', '2022/02/25'), ('2022/03/01','2022/03/04'), ('2022/03/08','2022/03/11'),
+            ('2022/03/15','2022/03/18'), ('2022/03/22','2022/03/25'), ('2022/03/29','2022/04/01'), ('2022/04/05','2022/04/08'), ('2022/04/12','2022/04/15'),
+            ('2022/04/19','2022/04/22'), ('2022/04/26','2022/04/29')]
     df = pd.DataFrame(data, columns=['class', 'name', 'date', 'time', 'duration'])
     sr = df.groupby(['class', 'name'])['date'].nunique()
     summary = {}
@@ -146,18 +147,16 @@ def summary():
                     std[3] += 1
                     std[4] += '| ' + date + ' : ' + str(duration) + '\' duration '
                 if not std[5]:
-                    if date in date1:
-                        std[5].extend(date1)
-                    else:
-                        std[5].extend(date2)
-                if date in std[5]:
-                    std[5].remove(date)
+                    std[5] += dates
+                for dt in std[5]:
+                    if date in dt:
+                        std[5].remove(dt)
                 break
 
     for cl,lst in summary.items():
         for std in lst:
             for date in std[5]:
-                std[4] += '| ' + date + ' : ' + ' absent'
+                std[4] += '| ' + date[0] + ' : ' + ' absent'
             std.pop()
         pd.DataFrame(lst, columns=['Name', 'Absent', 'Late', 'Short Duration', 'Detail']).to_excel(writer, sheet_name=cl)
 
@@ -178,9 +177,6 @@ def main():
 
     if st.sidebar.button('Export'):
         export()
-
-    # if st.sidebar.button('Summary'):
-    #     summary()
 
     uploaded_files = st.sidebar.file_uploader("Choose CSV files", accept_multiple_files=True, type='csv')
     if len(uploaded_files) > 0:
