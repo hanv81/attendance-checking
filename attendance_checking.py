@@ -142,10 +142,10 @@ def summary():
                 dt = (t-t0).seconds // 60
                 if t > t0 and dt > 0:
                     std[2] += 1
-                    std[4] += '| ' + date + ' : ' + str(dt) + '\' late '
+                    std[4] += '| ' + date + ' : trễ ' + str(dt) + '\' '
                 if duration < 60:
                     std[3] += 1
-                    std[4] += '| ' + date + ' : ' + str(duration) + '\' duration '
+                    std[4] += '| ' + date + ' : dự ' + str(duration) + '\' '
                 if not std[5]:
                     std[5] += dates
                 for dt in std[5]:
@@ -156,7 +156,7 @@ def summary():
     for cl,lst in summary.items():
         for std in lst:
             for date in std[5]:
-                std[4] += '| ' + date[0] + ' : ' + ' absent'
+                std[4] += '| ' + date[0] + ' : vắng '
             std.pop()
         pd.DataFrame(lst, columns=['Name', 'Absent', 'Late', 'Short Duration', 'Detail']).to_excel(writer, sheet_name=cl)
 
