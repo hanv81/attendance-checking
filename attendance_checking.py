@@ -25,26 +25,27 @@ def search(classes, id, name):
         st.subheader('Result')
         summary = []
         data = pd.DataFrame(columns = ['Name (Original Name)', 'Join Time', 'Leave Time', 'Duration (Minutes)'])
-        for f in files:
-            try:
-                df = pd.read_csv(f)
-                for j in df.index:
-                    df.loc[j,'Name (Original Name)'] = unidecode.unidecode(df.loc[j,'Name (Original Name)'])
-                if len(id) > 0:
-                    pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
-                else:
-                    pat = "^" + classes + ".*" + name
-                df = df[df['Name (Original Name)'].str.match(pat, case=False)]
+        with st.spinner('Please wait...'):
+            for f in files:
+                try:
+                    df = pd.read_csv(f)
+                    for j in df.index:
+                        df.loc[j,'Name (Original Name)'] = unidecode.unidecode(df.loc[j,'Name (Original Name)'])
+                    if len(id) > 0:
+                        pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
+                    else:
+                        pat = "^" + classes + ".*" + name
+                    df = df[df['Name (Original Name)'].str.match(pat, case=False)]
 
-                if not df.empty:
-                    df = df[['Name (Original Name)', 'Join Time', 'Leave Time', 'Duration (Minutes)']]
-                    data = pd.concat([data, df])
-                    duration = df['Duration (Minutes)'].sum()
-                    join_time = df['Join Time'].min()[11:]
-                    date = df.iloc[0]['Join Time'][:10]
-                    summary += [[date, join_time, duration]]
-            except:
-                print('Error')
+                    if not df.empty:
+                        df = df[['Name (Original Name)', 'Join Time', 'Leave Time', 'Duration (Minutes)']]
+                        data = pd.concat([data, df])
+                        duration = df['Duration (Minutes)'].sum()
+                        join_time = df['Join Time'].min()[11:]
+                        date = df.iloc[0]['Join Time'][:10]
+                        summary += [[date, join_time, duration]]
+                except:
+                    print('Error')
 
         if summary:
             hide_dataframe_row_index = """	<style>
