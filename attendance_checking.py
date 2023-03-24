@@ -25,6 +25,7 @@ def search(classes, id, name):
         st.subheader('Result')
         summary = []
         data = pd.DataFrame(columns = ['Name (Original Name)', 'Join Time', 'Leave Time', 'Duration (Minutes)'])
+        error = False
         with st.spinner('Please wait...'):
             for f in files:
                 try:
@@ -45,8 +46,11 @@ def search(classes, id, name):
                         date = df.iloc[0]['Join Time'][:10]
                         summary += [[date, join_time, duration]]
                 except:
+                    error = True
                     print('Error')
 
+        if error:
+            st.error("Errors happened")
         if summary:
             hide_dataframe_row_index = """	<style>
                                             .row_heading.level0 {display:none}
