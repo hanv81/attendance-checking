@@ -8,10 +8,10 @@ from datetime import datetime
 
 def verify(classes, name):
     if classes == None or len(classes) == 0:
-        st.write('Please input Class')
+        st.error('Please input Class')
         return False
     elif name == None or len(name) == 0:
-        st.write('Please input Student Name')
+        st.error('Please input Student Name')
         return False
     return True
 
@@ -19,36 +19,43 @@ def search(classes, id, name):
     if verify(classes, name):
         files = glob.glob('data/*.csv')
         if not files:
-            st.write('Data files not found')
+            st.info('Data files not found')
             return
 
-        st.write('Result')
+        st.subheader('Result')
         summary = []
+        data = pd.DataFrame(columns = ['Name (Original Name)', 'Join Time', 'Leave Time', 'Duration (Minutes)'])
         for f in files:
             try:
                 df = pd.read_csv(f)
-                df_copy = df.copy()
                 for j in df.index:
                     df.loc[j,'Name (Original Name)'] = unidecode.unidecode(df.loc[j,'Name (Original Name)'])
                 if len(id) > 0:
                     pat = "^" + classes + ".?-.?" + id + ".?-.?" + ".*" + name
                 else:
                     pat = "^" + classes + ".*" + name
-                rs = df.loc[df['Name (Original Name)'].str.match(pat, case=False)]
+                df = df[df['Name (Original Name)'].str.match(pat, case=False)]
 
-                if not rs.empty:
-                    rs = df_copy.loc[rs.index].drop(columns=['User Email', 'Guest', 'Recording Consent'])
-                    st.write(rs)
-                    duration = rs['Duration (Minutes)'].sum()
-                    join_time = rs['Join Time'].min()[11:]
-                    date = rs.iloc[0]['Join Time'][:10]
+                if not df.empty:
+                    df = df[['Name (Original Name)', 'Join Time', 'Leave Time', 'Duration (Minutes)']]
+                    data = pd.concat([data, df])
+                    duration = df['Duration (Minutes)'].sum()
+                    join_time = df['Join Time'].min()[11:]
+                    date = df.iloc[0]['Join Time'][:10]
                     summary += [[date, join_time, duration]]
             except:
                 print('Error')
 
         if summary:
-            st.write('Summary')
-            st.write(pd.DataFrame(summary, columns=['Date', 'Join Time', 'Duration (Minutes)']))
+            hide_dataframe_row_index = """	<style>
+                                            .row_heading.level0 {display:none}
+                                            .blank {display:none}
+                                            </style>"""
+
+            st.markdown(hide_dataframe_row_index, unsafe_allow_html=True)
+            st.table(data)
+            st.subheader('Summary')
+            st.table(pd.DataFrame(summary, columns=['Date', 'Join Time', 'Duration (Minutes)']))
 
 def export():
     files = glob.glob('data/*.csv')
